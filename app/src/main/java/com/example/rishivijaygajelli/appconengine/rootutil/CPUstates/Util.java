@@ -1,5 +1,8 @@
 package com.example.rishivijaygajelli.appconengine.rootutil.CPUstates;
 
+import android.content.Context;
+import android.util.Log;
+
 import com.topjohnwu.superuser.io.SuFile;
 import com.topjohnwu.superuser.io.SuFileInputStream;
 
@@ -11,9 +14,11 @@ import java.nio.charset.Charset;
 
 public class Util {
 
+    private static final String TAG = "";
     static String NUM_OF_CPUS_PATH = "/sys/devices/system/cpu/present";
 
-    public static int getNumOfCpus() {
+
+    public int getNumOfCpus() {
         int numOfCpu = 1;
         String numOfCpus = readOneLine(NUM_OF_CPUS_PATH);
         String[] cpuCount = numOfCpus.split("-");
@@ -30,7 +35,7 @@ public class Util {
         return numOfCpu;
     }
 
-    public static String readOneLine(String fname) {
+    public String readOneLine(String fname) {
         String line = null;
         if (new File(fname).exists()) {
             BufferedReader br;
@@ -53,6 +58,10 @@ public class Util {
     }
 
 
+    public String toMHz(String mhzString) {
+        if ((mhzString == null) || (mhzString.length() <= 0)) return "";
+        else return String.valueOf(Integer.parseInt(mhzString) / 1000) + " MHz";
+    }
 
 
     public static String readFileViaShell(String filePath) {
