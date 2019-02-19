@@ -2,15 +2,20 @@ package com.example.rishivijaygajelli.appconengine;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
@@ -18,8 +23,17 @@ import android.widget.TextView;
 
 import com.example.rishivijaygajelli.appconengine.rootutil.CPUstates.Util;
 import com.example.rishivijaygajelli.appconengine.rootutil.RootUtil;
+import com.topjohnwu.superuser.io.SuFile;
+import com.topjohnwu.superuser.io.SuFileInputStream;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,6 +46,13 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
     TextView current_speed, max_speed_text, min_speed_text;
     SeekBar max_slider, min_slider;
     Toolbar toolbar;
+    Button btn_save_profile;
+
+    SharedPreferences mPreferences;
+
+    String current_max = "";
+    String current_min = "";
+
     public static final String MAX_FREQ_PATH = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq";
     public static final String MIN_FREQ_PATH = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq";
     public static final String STEPS_PATH = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies";
@@ -58,9 +79,11 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cpu);
 
+        mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
         String cpu_steps = util.readOneLine(STEPS_PATH);
         cpu = getFrequencies(cpu_steps);
-        final int mFrequenciesNum = cpu.length - 1;
+        int mFrequenciesNum = cpu.length - 1;
 
         current_speed = findViewById(R.id.current_speed);
         max_speed_text = findViewById(R.id.max_speed_text);
@@ -134,6 +157,26 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
             IOAdapter.add(mAvailableIOs.trim());
         }
         spn_io.setAdapter(IOAdapter);
+
+        btn_save_profile = findViewById(R.id.btn_save_profile);
+        btn_save_profile.setOnClickListener(v -> {
+            Util.setMaxFreq(current_max);
+            Util.setMinFreq(current_min);
+           /* try
+            {
+                SuFile file =  new SuFile(MAX_FREQ_PATH);
+                SuFileInputStream fileInput = new SuFileInputStream(file);
+                StringBuilder stringBuilder = new StringBuilder();
+
+                BufferedWriter buf = new BufferedWriter (new FileWriter(file));
+                buf.write(cpuMax);
+                buf.flush();
+                }
+            catch (Exception e)
+            {
+                // Toast.makeText(MainScreenActivity.this,"Not reading",Toast.LENGTH_LONG).show();
+            }*/
+        });
     }
 
     @Override
@@ -160,24 +203,24 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
     }
 
     public void setMaxSpeed(int progress) {
-        final String current = cpu[progress];
+        current_max = cpu[progress];
         int maxSliderProgress = max_slider.getProgress();
         if (progress <= maxSliderProgress) {
            max_slider.setProgress(progress);
-            max_speed_text.setText(util.toMHz(current));
+            max_speed_text.setText(util.toMHz(current_max));
         }
     }
 
     public void setMinSpeed(int progress) {
-        final String current = cpu[progress];
+        current_min = cpu[progress];
         int minSliderProgress = min_slider.getProgress();
         if (progress <= minSliderProgress) {
             min_slider.setProgress(progress);
-            min_speed_text.setText(util.toMHz(current));
+            min_speed_text.setText(util.toMHz(current_min));
         }
     }
 
-    private String[] getFrequencies(String content)
+    public static String[] getFrequencies(String content)
     {
         String[] frequencyHz = content.split("\\s+");
         ArrayList<String> frequencies = new ArrayList<>(Arrays.asList(frequencyHz));

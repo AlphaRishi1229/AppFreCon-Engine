@@ -1,16 +1,22 @@
 package com.example.rishivijaygajelli.appconengine.rootutil.CPUstates;
 
-import android.content.Context;
-import android.util.Log;
-
+import com.example.rishivijaygajelli.appconengine.CPUActivity;
+import com.topjohnwu.superuser.Shell;
+import com.topjohnwu.superuser.ShellUtils;
 import com.topjohnwu.superuser.io.SuFile;
 import com.topjohnwu.superuser.io.SuFileInputStream;
+import com.topjohnwu.superuser.io.SuFileOutputStream;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Util {
 
@@ -35,7 +41,7 @@ public class Util {
         return numOfCpu;
     }
 
-    public String readOneLine(String fname) {
+    public static String readOneLine(String fname) {
         String line = null;
         if (new File(fname).exists()) {
             BufferedReader br;
@@ -68,22 +74,64 @@ public class Util {
 
         String line = null;
         //return Shell.su("cat "+"$"+filePath).exec().toString();
-        try
-        {
-            SuFile file =  new SuFile(filePath);
+        try {
+            SuFile file = new SuFile(filePath);
             SuFileInputStream fileInput = new SuFileInputStream(file);
             StringBuilder stringBuilder = new StringBuilder();
 
-            BufferedReader buf = new BufferedReader (new InputStreamReader(fileInput, Charset.defaultCharset()));
-            while((line =buf.readLine()) != null){
+            BufferedReader buf = new BufferedReader(new InputStreamReader(fileInput, Charset.defaultCharset()));
+            while ((line = buf.readLine()) != null) {
                 stringBuilder.append(line);
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             // Toast.makeText(MainScreenActivity.this,"Not reading",Toast.LENGTH_LONG).show();
         }
         return line;
     }
 
+    public static boolean setMaxFreq(String max_freq) {
+       ByteArrayInputStream inputStream = new ByteArrayInputStream(max_freq.getBytes(Charset.forName("UTF-8")));
+       SuFileOutputStream outputStream;
+        try {
+            if (max_freq != null) {
+                int cpus = 0;
+                while (true) {
+                    SuFile f = new SuFile(CPUActivity.MAX_FREQ_PATH.replace("cpu0", "cpu" + cpus));
+                    outputStream = new SuFileOutputStream(f);
+                    ShellUtils.pump(inputStream, outputStream);
+
+                    if (!f.exists()) {
+                        break;
+                    }
+                    cpus++;
+                }
+
+            }
+        } catch (Exception ex) {
+        }
+        return true;
+    }
+
+    public static boolean setMinFreq(String min_freq) {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(min_freq.getBytes(Charset.forName("UTF-8")));
+        SuFileOutputStream outputStream;
+        try {
+            if (min_freq != null) {
+                int cpus = 0;
+                while (true) {
+                    SuFile f = new SuFile(CPUActivity.MIN_FREQ_PATH.replace("cpu0", "cpu" + cpus));
+                    outputStream = new SuFileOutputStream(f);
+                    ShellUtils.pump(inputStream, outputStream);
+
+                    if (!f.exists()) {
+                        break;
+                    }
+                    cpus++;
+                }
+
+            }
+        } catch (Exception ex) {
+        }
+        return true;
+    }
 }
