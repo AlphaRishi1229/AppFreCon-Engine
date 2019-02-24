@@ -41,7 +41,7 @@ import java.util.List;
 
 public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener {
 
-    Spinner spn_app, spn_governor, spn_io;
+    Spinner spn_app, spn_governor;
     LinearLayout lcurcpu;
     TextView current_speed, max_speed_text, min_speed_text;
     SeekBar max_slider, min_slider;
@@ -57,7 +57,7 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
     public static final String MIN_FREQ_PATH = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq";
     public static final String STEPS_PATH = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies";
     public static final String GOVERNORS_LIST_PATH = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors";
-    public static final String IO_SCHEDULER_PATH = "/sys/block/mmcblk0/queue/scheduler";
+    public static final String GOVERNOR_PATH = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor";
 
     private static final String TAG = "";
     public static ArrayList<String> mCurGovernor = new ArrayList<String>();
@@ -142,40 +142,29 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
 
         spn_governor = findViewById(R.id.spn_governor);
         String[] mAvailableGovernors = util.readOneLine(GOVERNORS_LIST_PATH).split(" ");
+        String cur_governor = util.readOneLine(GOVERNOR_PATH);
+        int in = 0;
+        for(int i=0; i<mAvailableGovernors.length;i++)
+        {
+            if(cur_governor.equals(mAvailableGovernors[i]))
+            {
+                in=i;
+            }
+        }
         ArrayAdapter<CharSequence> governorAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_list_item_1);
         governorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         for (String mAvailableGovernor : mAvailableGovernors) {
             governorAdapter.add(mAvailableGovernor.trim());
         }
         spn_governor.setAdapter(governorAdapter);
+        spn_governor.setSelection(in);
 
-        spn_io = findViewById(R.id.spn_io);
-        String[] mAvailableIO = util.readOneLine(IO_SCHEDULER_PATH).split(" ");
-        ArrayAdapter<CharSequence> IOAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_list_item_1);
-        IOAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        for (String mAvailableIOs : mAvailableIO) {
-            IOAdapter.add(mAvailableIOs.trim());
-        }
-        spn_io.setAdapter(IOAdapter);
 
         btn_save_profile = findViewById(R.id.btn_save_profile);
         btn_save_profile.setOnClickListener(v -> {
-            Util.setMaxFreq(current_max);
-            Util.setMinFreq(current_min);
-           /* try
-            {
-                SuFile file =  new SuFile(MAX_FREQ_PATH);
-                SuFileInputStream fileInput = new SuFileInputStream(file);
-                StringBuilder stringBuilder = new StringBuilder();
 
-                BufferedWriter buf = new BufferedWriter (new FileWriter(file));
-                buf.write(cpuMax);
-                buf.flush();
-                }
-            catch (Exception e)
-            {
-                // Toast.makeText(MainScreenActivity.this,"Not reading",Toast.LENGTH_LONG).show();
-            }*/
+            Util.setFreq(current_max,current_min);
+
         });
     }
 

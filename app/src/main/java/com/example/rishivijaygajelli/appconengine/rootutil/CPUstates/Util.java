@@ -89,16 +89,24 @@ public class Util {
         return line;
     }
 
-    public static boolean setMaxFreq(String max_freq) {
+    public static boolean setFreq(String max_freq, String min_freq) {
        ByteArrayInputStream inputStream = new ByteArrayInputStream(max_freq.getBytes(Charset.forName("UTF-8")));
+       ByteArrayInputStream inputStream1 = new ByteArrayInputStream(min_freq.getBytes(Charset.forName("UTF-8")));
+
        SuFileOutputStream outputStream;
+        SuFileOutputStream outputStream1;
         try {
             if (max_freq != null) {
                 int cpus = 0;
                 while (true) {
                     SuFile f = new SuFile(CPUActivity.MAX_FREQ_PATH.replace("cpu0", "cpu" + cpus));
+                    SuFile f1 = new SuFile(CPUActivity.MIN_FREQ_PATH.replace("cpu0", "cpu" + cpus));
+
                     outputStream = new SuFileOutputStream(f);
+                    outputStream1 = new SuFileOutputStream(f1);
+
                     ShellUtils.pump(inputStream, outputStream);
+                    ShellUtils.pump(inputStream1, outputStream1);
 
                     if (!f.exists()) {
                         break;
@@ -112,26 +120,4 @@ public class Util {
         return true;
     }
 
-    public static boolean setMinFreq(String min_freq) {
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(min_freq.getBytes(Charset.forName("UTF-8")));
-        SuFileOutputStream outputStream;
-        try {
-            if (min_freq != null) {
-                int cpus = 0;
-                while (true) {
-                    SuFile f = new SuFile(CPUActivity.MIN_FREQ_PATH.replace("cpu0", "cpu" + cpus));
-                    outputStream = new SuFileOutputStream(f);
-                    ShellUtils.pump(inputStream, outputStream);
-
-                    if (!f.exists()) {
-                        break;
-                    }
-                    cpus++;
-                }
-
-            }
-        } catch (Exception ex) {
-        }
-        return true;
-    }
 }

@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -67,6 +68,7 @@ public class MainScreenActivity extends AppCompatActivity {
     private TextView ui_additional_states;
     private TextView ui_current_freq;
     private DrawerLayout drawer_main;
+    private Switch service_switch;
     private Button btn_refresh;
     private CPUStateMonitor monitor = new CPUStateMonitor();
     private boolean mUpdatingData = false;
