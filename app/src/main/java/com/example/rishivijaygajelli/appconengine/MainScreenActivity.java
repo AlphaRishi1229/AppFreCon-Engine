@@ -1,17 +1,22 @@
 package com.example.rishivijaygajelli.appconengine;
 
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -24,12 +29,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.rishivijaygajelli.appconengine.Services.ForegroundService;
 import com.example.rishivijaygajelli.appconengine.rootutil.CPUstates.CPUStateMonitor;
 import com.topjohnwu.superuser.ContainerApp;
 import com.topjohnwu.superuser.Shell;
@@ -53,6 +60,8 @@ import java.util.Map;
 import static com.example.rishivijaygajelli.appconengine.MainScreenActivity.CurrentFrequency.CUR_CPU_PATH;
 import static com.example.rishivijaygajelli.appconengine.MainScreenActivity.CurrentFrequency.NUM_OF_CPUS_PATH;
 import static com.example.rishivijaygajelli.appconengine.rootutil.CPUstates.CPUStateMonitor.PREF_OFFSETS;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 
 public class MainScreenActivity extends AppCompatActivity {
 
@@ -107,9 +116,23 @@ public class MainScreenActivity extends AppCompatActivity {
                             @Override
                             public void run() {
                                 refreshData();
-                                String freq1 = cf.readOneLine(CUR_CPU_PATH);
-                                String freqfinal = toMHz(freq1);
-                                ui_current_freq.setText(freqfinal);
+                                String cur_freq = cf.readOneLine(CUR_CPU_PATH);
+                                String curfreqfinal = toMHz(cur_freq);
+
+                                String max_freq = cf.readOneLine(CPUActivity.MAX_FREQ_PATH);
+                                String maxfreqfinal = toMHz(max_freq);
+
+                                String min_freq = cf.readOneLine(CPUActivity.MIN_FREQ_PATH);
+                                String minfreqfinal = toMHz(min_freq);
+
+                                Intent in = new Intent("intentKey");
+                                in.putExtra("curfreq",curfreqfinal);
+                                in.putExtra("maxfreq",maxfreqfinal);
+                                in.putExtra("minfreq",minfreqfinal);
+
+                                //sendBroadcast(in);
+                                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(in);
+                                ui_current_freq.setText(curfreqfinal);
                             }
                         });
                     }
@@ -169,7 +192,50 @@ public class MainScreenActivity extends AppCompatActivity {
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         loadOffsets();
 
+        service_switch = findViewById(R.id.service_switch);
+        service_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked == TRUE)
+                {
+                    if(!needsUsageStatsPermission())
+                    {
+                        Toast.makeText(MainScreenActivity.this,"Permission Already Granted",Toast.LENGTH_LONG).show();
+                        Toast.makeText(MainScreenActivity.this,"AppFreCon Service Started",Toast.LENGTH_LONG).show();
+                        ForegroundService.start(getBaseContext());
+                    }
+                    else
+                    {
+                        requestUsageStatsPermission();
+                    }
+                }
+                else if(isChecked == FALSE)
+                {
+                    ForegroundService.stop(getBaseContext());
+                    Toast.makeText(MainScreenActivity.this,"AppFreCon Service Stopped",Toast.LENGTH_LONG).show();
+                }
+            }
+        });
 
+    }
+
+    private boolean needsUsageStatsPermission() {
+        return!hasUsageStatsPermission(this);
+    }
+
+    private void requestUsageStatsPermission() {
+        if(!hasUsageStatsPermission(this)) {
+            startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    public static boolean hasUsageStatsPermission(Context context) {
+        AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+        int mode = appOps.checkOpNoThrow("android:get_usage_stats",
+                android.os.Process.myUid(), context.getPackageName());
+        boolean granted = mode == AppOpsManager.MODE_ALLOWED;
+        return granted;
     }
 
     @Override
