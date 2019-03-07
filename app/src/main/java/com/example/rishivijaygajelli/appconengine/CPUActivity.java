@@ -2,18 +2,19 @@ package com.example.rishivijaygajelli.appconengine;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -21,25 +22,15 @@ import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.example.rishivijaygajelli.appconengine.rootutil.BackgroundAppCheck.ChangeFreqTask;
 import com.example.rishivijaygajelli.appconengine.rootutil.CPUstates.Util;
-import com.example.rishivijaygajelli.appconengine.rootutil.RootUtil;
-import com.topjohnwu.superuser.io.SuFile;
-import com.topjohnwu.superuser.io.SuFileInputStream;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener {
+public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, LoaderManager.LoaderCallbacks<Void> {
 
     Spinner spn_app, spn_governor;
     LinearLayout lcurcpu;
@@ -49,6 +40,8 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
     Button btn_save_profile;
 
     SharedPreferences mPreferences;
+
+    LoaderManager loaderManager;
 
     String current_max = "";
     String current_min = "";
@@ -99,6 +92,7 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
         min_slider.setMax(mFrequenciesNum);
 
         toolbar = (Toolbar)findViewById(R.id.toolbar);
+        loaderManager = getSupportLoaderManager();
 
         String cpuMax = util.readOneLine(MAX_FREQ_PATH);
         String cpuMaxFinal = util.toMHz(cpuMax);
@@ -160,10 +154,12 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
         spn_governor.setSelection(in);
 
 
+
         btn_save_profile = findViewById(R.id.btn_save_profile);
         btn_save_profile.setOnClickListener(v -> {
 
-            Util.setFreq(current_max,current_min);
+           // Util.setFreq(current_max,current_min);
+
 
         });
     }
@@ -216,4 +212,19 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
         return frequencies.toArray(new String[0]);
     }
 
+    @NonNull
+    @Override
+    public Loader<Void> onCreateLoader(int i, @Nullable Bundle bundle) {
+        return new ChangeFreqTask(this,current_max,current_min);
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<Void> loader, Void aVoid) {
+
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<Void> loader) {
+
+    }
 }
