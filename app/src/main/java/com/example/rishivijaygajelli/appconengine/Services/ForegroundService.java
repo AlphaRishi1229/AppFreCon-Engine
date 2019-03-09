@@ -12,13 +12,13 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.LocalBroadcastManager;
-import android.widget.Toast;
 
 import com.example.rishivijaygajelli.appconengine.R;
 import com.example.rishivijaygajelli.appconengine.rootutil.BackgroundAppCheck.AppChecker;
+
+import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 public class ForegroundService extends Service {
 

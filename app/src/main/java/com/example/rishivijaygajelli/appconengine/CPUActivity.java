@@ -5,30 +5,35 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Build;
-import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.rishivijaygajelli.appconengine.rootutil.BackgroundAppCheck.ChangeFreqTask;
 import com.example.rishivijaygajelli.appconengine.rootutil.CPUstates.Util;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.Loader;
 
 public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, LoaderManager.LoaderCallbacks<Void> {
 
@@ -66,6 +71,8 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
 
     int max_cpu_array, min_cpu_array;
 
+    String app = null;
+    String cpuMaxFinal, cpuMinFinal = null;
     @TargetApi(Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +81,7 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
 
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        String cpu_steps = util.readOneLine(STEPS_PATH);
+        String cpu_steps = Util.readOneLine(STEPS_PATH);
         cpu = getFrequencies(cpu_steps);
         int mFrequenciesNum = cpu.length - 1;
 
@@ -91,25 +98,26 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
         min_slider.setOnSeekBarChangeListener(this);
         min_slider.setMax(mFrequenciesNum);
 
-        toolbar = (Toolbar)findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         loaderManager = getSupportLoaderManager();
 
-        String cpuMax = util.readOneLine(MAX_FREQ_PATH);
-        String cpuMaxFinal = util.toMHz(cpuMax);
+        if (loaderManager.getLoader(1) != null) {
+            loaderManager.initLoader(1, null, this);
+        }
+
+        String cpuMax = Util.readOneLine(MAX_FREQ_PATH);
+        cpuMaxFinal = util.toMHz(cpuMax);
         max_speed_text.setText(cpuMaxFinal);
 
-        String cpuMin = util.readOneLine(MIN_FREQ_PATH);
-        String cpuMinFinal = util.toMHz(cpuMin);
+        String cpuMin = Util.readOneLine(MIN_FREQ_PATH);
+        cpuMinFinal = util.toMHz(cpuMin);
         min_speed_text.setText(cpuMinFinal);
 
-        for(int i = 0; i < cpu.length; i++)
-        {
+        for(int i = 0; i < cpu.length; i++) {
             if (cpuMax.equals(cpu[i])) {
                 max_cpu_array = i;
                 max_slider.setProgress(max_cpu_array);
-            }
-            else if (cpuMin.equals(cpu[i]))
-            {
+            } else if (cpuMin.equals(cpu[i])) {
                 min_cpu_array = i;
                 min_slider.setProgress(min_cpu_array);
             }
@@ -135,13 +143,11 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
 
 
         spn_governor = findViewById(R.id.spn_governor);
-        String[] mAvailableGovernors = util.readOneLine(GOVERNORS_LIST_PATH).split(" ");
-        String cur_governor = util.readOneLine(GOVERNOR_PATH);
+        String[] mAvailableGovernors = Util.readOneLine(GOVERNORS_LIST_PATH).split(" ");
+        String cur_governor = Util.readOneLine(GOVERNOR_PATH);
         int in = 0;
-        for(int i=0; i<mAvailableGovernors.length;i++)
-        {
-            if(cur_governor.equals(mAvailableGovernors[i]))
-            {
+        for(int i = 0; i<mAvailableGovernors.length; i++) {
+            if(cur_governor.equals(mAvailableGovernors[i])) {
                 in=i;
             }
         }
@@ -154,14 +160,45 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
         spn_governor.setSelection(in);
 
 
-
         btn_save_profile = findViewById(R.id.btn_save_profile);
         btn_save_profile.setOnClickListener(v -> {
 
-           // Util.setFreq(current_max,current_min);
-
-
+            // Util.setFreq(current_max,current_min);
+            app = spn_app.getSelectedItem().toString();
+            if (app.equals(".All Apps (Overall Device)")) {
+                loaderManager.initLoader(1, null, this);
+            } else {
+                writeFreqtoFile(app, max_speed_text.getText().toString(), min_speed_text.getText().toString());
+                Toast.makeText(this, app, Toast.LENGTH_LONG).show();
+            }
         });
+    }
+
+    private void writeFreqtoFile(String app, String max_speed, String min_speed) {
+        this.app = app;
+        this.cpuMaxFinal = max_speed;
+        this.cpuMinFinal = min_speed;
+        try {
+            File folder = new File(Environment.getExternalStorageDirectory() + "/AppFreCon Engine");
+            if (!folder.exists()) {
+                folder.mkdir();
+                System.out.println("Directory created");
+            }
+            File file = new File(Environment.getExternalStorageDirectory() + "/AppFreCon Engine/App Frequency.conf");
+            if (!file.exists()) {
+                file.createNewFile();
+                System.out.println("File created");
+            }
+            FileOutputStream fout = new FileOutputStream(file.getAbsoluteFile(), true);
+            OutputStreamWriter myOutWriter = new OutputStreamWriter(fout);
+
+            myOutWriter.write(app + " " + max_speed + " " + min_speed + "\n");
+            myOutWriter.flush();
+
+        } catch (Exception e) {
+            // TODO: handle exception
+            e.printStackTrace();
+        }
     }
 
     @Override

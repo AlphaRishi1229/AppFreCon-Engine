@@ -1,11 +1,12 @@
 package com.example.rishivijaygajelli.appconengine.rootutil.BackgroundAppCheck;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.content.AsyncTaskLoader;
 
 import com.example.rishivijaygajelli.appconengine.rootutil.CPUstates.Util;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.loader.content.AsyncTaskLoader;
 
 public class ChangeFreqTask extends AsyncTaskLoader<Void> {
 

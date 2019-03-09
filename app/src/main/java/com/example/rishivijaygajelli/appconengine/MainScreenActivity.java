@@ -1,29 +1,15 @@
 package com.example.rishivijaygajelli.appconengine;
 
 import android.annotation.TargetApi;
-import android.app.AlertDialog;
 import android.app.AppOpsManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Message;
-import android.preference.PreferenceManager;
-import android.provider.DocumentsContract;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.design.widget.NavigationView;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,27 +24,30 @@ import android.widget.Toast;
 
 import com.example.rishivijaygajelli.appconengine.Services.ForegroundService;
 import com.example.rishivijaygajelli.appconengine.rootutil.CPUstates.CPUStateMonitor;
-import com.topjohnwu.superuser.ContainerApp;
+import com.google.android.material.navigation.NavigationView;
 import com.topjohnwu.superuser.Shell;
 import com.topjohnwu.superuser.io.SuFile;
 import com.topjohnwu.superuser.io.SuFileInputStream;
 
 import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.ref.WeakReference;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import static com.example.rishivijaygajelli.appconengine.MainScreenActivity.CurrentFrequency.CUR_CPU_PATH;
-import static com.example.rishivijaygajelli.appconengine.MainScreenActivity.CurrentFrequency.NUM_OF_CPUS_PATH;
 import static com.example.rishivijaygajelli.appconengine.rootutil.CPUstates.CPUStateMonitor.PREF_OFFSETS;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
@@ -144,13 +133,13 @@ public class MainScreenActivity extends AppCompatActivity {
         thread.start();
 
 
-        ui_states_view = (LinearLayout) findViewById(R.id.ui_states_view);
-        ui_total_state_time = (TextView) findViewById(R.id.ui_total_state_time);
-        ui_states_warning = (TextView) findViewById(R.id.ui_states_warning);
-        ui_header_additional_states = (TextView) findViewById(R.id.ui_header_additional_states);
-        ui_current_freq = (TextView) findViewById(R.id.ui_current_freq);
-        ui_additional_states = (TextView) findViewById(R.id.ui_additional_states);
-        drawer_main = (DrawerLayout)findViewById(R.id.drawer_main);
+        ui_states_view = findViewById(R.id.ui_states_view);
+        ui_total_state_time = findViewById(R.id.ui_total_state_time);
+        ui_states_warning = findViewById(R.id.ui_states_warning);
+        ui_header_additional_states = findViewById(R.id.ui_header_additional_states);
+        ui_current_freq = findViewById(R.id.ui_current_freq);
+        ui_additional_states = findViewById(R.id.ui_additional_states);
+        drawer_main = findViewById(R.id.drawer_main);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -335,10 +324,10 @@ public class MainScreenActivity extends AppCompatActivity {
         long tSec = state.duration / 100;
         String sDur = toString(tSec);
 
-        TextView freqText = (TextView) view.findViewById(R.id.ui_freq_text);
-        TextView durText = (TextView) view.findViewById(R.id.ui_duration_text);
-        TextView perText = (TextView) view.findViewById(R.id.ui_percentage_text);
-        ProgressBar bar = (ProgressBar) view.findViewById(R.id.ui_bar);
+        TextView freqText = view.findViewById(R.id.ui_freq_text);
+        TextView durText = view.findViewById(R.id.ui_duration_text);
+        TextView perText = view.findViewById(R.id.ui_percentage_text);
+        ProgressBar bar = view.findViewById(R.id.ui_bar);
 
         freqText.setText(sFreq);
         perText.setText(sPer);
