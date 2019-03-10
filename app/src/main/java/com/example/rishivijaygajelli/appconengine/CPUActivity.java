@@ -207,6 +207,7 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
             switch (seekBar.getId()){
                 case R.id.max_slider:
                     setMaxSpeed(progress);
+                    //yessss
                     break;
                 case R.id.min_slider:
                     setMinSpeed(progress);
