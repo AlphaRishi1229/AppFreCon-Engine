@@ -1,6 +1,8 @@
 package com.example.rishivijaygajelli.appconengine;
 
 import android.annotation.TargetApi;
+import android.app.ActivityManager;
+import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
@@ -19,6 +21,8 @@ import android.widget.Toast;
 
 import com.example.rishivijaygajelli.appconengine.rootutil.BackgroundAppCheck.ChangeFreqTask;
 import com.example.rishivijaygajelli.appconengine.rootutil.CPUstates.Util;
+import com.pranavpandey.android.dynamic.engine.service.DynamicEngine;
+import com.pranavpandey.android.dynamic.engine.task.DynamicAppMonitor;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -34,6 +38,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
+
 
 public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, LoaderManager.LoaderCallbacks<Void> {
 
@@ -70,9 +75,20 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
     String[] cpu;
 
     int max_cpu_array, min_cpu_array;
+    int cpuFileMaxFinal, cpuFileMinFinal;
 
     String app = null;
     String cpuMaxFinal, cpuMinFinal = null;
+    String cpuMax, cpuMin, cpuFileMax, cpuFileMin = null;
+
+    ActivityManager mActivityManager;
+    DynamicEngine mDynamicEngine;
+    UsageStatsManager mUsageStatsManager;
+    private DynamicAppMonitor mDynamicAppMonitor;
+
+    public CPUActivity() {
+    }
+
     @TargetApi(Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,6 +110,7 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
         max_slider.setOnSeekBarChangeListener(this);
         max_slider.setMax(mFrequenciesNum);
 
+
         min_slider = findViewById(R.id.min_slider);
         min_slider.setOnSeekBarChangeListener(this);
         min_slider.setMax(mFrequenciesNum);
@@ -105,11 +122,11 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
             loaderManager.initLoader(1, null, this);
         }
 
-        String cpuMax = Util.readOneLine(MAX_FREQ_PATH);
+        cpuMax = Util.readOneLine(MAX_FREQ_PATH);
         cpuMaxFinal = util.toMHz(cpuMax);
         max_speed_text.setText(cpuMaxFinal);
 
-        String cpuMin = Util.readOneLine(MIN_FREQ_PATH);
+        cpuMin = Util.readOneLine(MIN_FREQ_PATH);
         cpuMinFinal = util.toMHz(cpuMin);
         min_speed_text.setText(cpuMinFinal);
 
@@ -163,25 +180,32 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
         btn_save_profile = findViewById(R.id.btn_save_profile);
         btn_save_profile.setOnClickListener(v -> {
 
+            cpuFileMax = max_speed_text.getText().toString().replace(" MHz", "");
+            cpuFileMaxFinal = Integer.parseInt(cpuFileMax) * 1000;
+            cpuFileMin = min_speed_text.getText().toString().replace(" MHz", "");
+            cpuFileMinFinal = Integer.parseInt(cpuFileMin) * 1000;
+
             // Util.setFreq(current_max,current_min);
             app = spn_app.getSelectedItem().toString();
             if (app.equals(".All Apps (Overall Device)")) {
                 loaderManager.initLoader(1, null, this);
             } else {
-                writeFreqtoFile(app, max_speed_text.getText().toString(), min_speed_text.getText().toString());
+                writeFreqtoFile(app, cpuFileMaxFinal, cpuFileMinFinal);
                 Toast.makeText(this, app, Toast.LENGTH_LONG).show();
             }
         });
+
     }
 
-    private void writeFreqtoFile(String app, String max_speed, String min_speed) {
+
+    private void writeFreqtoFile(String app, int max_speed, int min_speed) {
         this.app = app;
-        this.cpuMaxFinal = max_speed;
-        this.cpuMinFinal = min_speed;
+        this.cpuFileMaxFinal = max_speed;
+        this.cpuFileMinFinal = min_speed;
         try {
             File folder = new File(Environment.getExternalStorageDirectory() + "/AppFreCon Engine");
             if (!folder.exists()) {
-                folder.mkdir();
+                folder.mkdirs();
                 System.out.println("Directory created");
             }
             File file = new File(Environment.getExternalStorageDirectory() + "/AppFreCon Engine/App Frequency.conf");
@@ -196,7 +220,6 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
             myOutWriter.flush();
 
         } catch (Exception e) {
-            // TODO: handle exception
             e.printStackTrace();
         }
     }
@@ -207,7 +230,6 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
             switch (seekBar.getId()){
                 case R.id.max_slider:
                     setMaxSpeed(progress);
-                    //yessss
                     break;
                 case R.id.min_slider:
                     setMinSpeed(progress);
@@ -265,4 +287,5 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
     public void onLoaderReset(@NonNull Loader<Void> loader) {
 
     }
+
 }

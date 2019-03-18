@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import com.example.rishivijaygajelli.appconengine.Services.ForegroundService;
 import com.example.rishivijaygajelli.appconengine.rootutil.CPUstates.CPUStateMonitor;
+import com.example.rishivijaygajelli.appconengine.rootutil.CPUstates.Util;
 import com.google.android.material.navigation.NavigationView;
 import com.topjohnwu.superuser.Shell;
 import com.topjohnwu.superuser.io.SuFile;
@@ -67,6 +68,7 @@ public class MainScreenActivity extends AppCompatActivity {
     private TextView ui_current_freq;
     private DrawerLayout drawer_main;
     private Switch service_switch;
+    private Switch accessibility_switch;
     private Button btn_refresh;
     private CPUStateMonitor monitor = new CPUStateMonitor();
     private boolean mUpdatingData = false;
@@ -92,7 +94,6 @@ public class MainScreenActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_screen);
         Shell.rootAccess();
-
 
         Thread thread = new Thread() {
 
@@ -181,11 +182,13 @@ public class MainScreenActivity extends AppCompatActivity {
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         loadOffsets();
 
+
         service_switch = findViewById(R.id.service_switch);
         service_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked == TRUE)
+                Util.setSharedPref(MainScreenActivity.this, "prefs2", isChecked);
+                if (isChecked == TRUE)
                 {
                     if(!needsUsageStatsPermission())
                     {
@@ -195,6 +198,7 @@ public class MainScreenActivity extends AppCompatActivity {
                     }
                     else
                     {
+
                         requestUsageStatsPermission();
                     }
                 }
@@ -205,7 +209,8 @@ public class MainScreenActivity extends AppCompatActivity {
                 }
             }
         });
-
+        boolean isSavedAsChecked2 = Util.getSharedPref(this, "prefs2", false);
+        service_switch.setChecked(isSavedAsChecked2);
     }
 
     private boolean needsUsageStatsPermission() {
@@ -360,6 +365,11 @@ public class MainScreenActivity extends AppCompatActivity {
         }
         editor.putString(PREF_OFFSETS, str).commit();
 
+    }
+
+    public void AccessibilityClick(View view) {
+        Intent intent = new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS);
+        startActivity(intent);
     }
 
     protected class RefreshStateDataTask extends AsyncTask<Void, Void, Void> {
