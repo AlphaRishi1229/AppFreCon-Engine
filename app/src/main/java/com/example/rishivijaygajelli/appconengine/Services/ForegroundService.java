@@ -33,6 +33,7 @@ public class ForegroundService extends Service {
 
     private BroadcastReceiver stopServiceReceiver;
     private AppChecker appChecker;
+    String app;
 
     public static void start(Context context) {
         context.startService(new Intent(context, ForegroundService.class));
@@ -84,6 +85,7 @@ public class ForegroundService extends Service {
                 })
                 .timeout(1000)
                 .start(this);
+
     }
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override

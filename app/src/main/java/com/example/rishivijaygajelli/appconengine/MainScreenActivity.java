@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.rishivijaygajelli.appconengine.Services.ForegroundService;
+import com.example.rishivijaygajelli.appconengine.rootutil.BackgroundAppCheck.DynamicMontoring;
 import com.example.rishivijaygajelli.appconengine.rootutil.CPUstates.CPUStateMonitor;
 import com.example.rishivijaygajelli.appconengine.rootutil.CPUstates.Util;
 import com.google.android.material.navigation.NavigationView;
@@ -133,6 +134,8 @@ public class MainScreenActivity extends AppCompatActivity {
 
         thread.start();
 
+        Intent intent = new Intent(this, DynamicMontoring.class);
+        startService(intent);
 
         ui_states_view = findViewById(R.id.ui_states_view);
         ui_total_state_time = findViewById(R.id.ui_total_state_time);
@@ -367,10 +370,6 @@ public class MainScreenActivity extends AppCompatActivity {
 
     }
 
-    public void AccessibilityClick(View view) {
-        Intent intent = new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS);
-        startActivity(intent);
-    }
 
     protected class RefreshStateDataTask extends AsyncTask<Void, Void, Void> {
         @Override

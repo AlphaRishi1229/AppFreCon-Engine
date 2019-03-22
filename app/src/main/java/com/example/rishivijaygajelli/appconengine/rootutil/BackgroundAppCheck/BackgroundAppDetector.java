@@ -1,7 +1,6 @@
 package com.example.rishivijaygajelli.appconengine.rootutil.BackgroundAppCheck;
 
 import android.annotation.TargetApi;
-import android.app.ActivityManager;
 import android.app.Service;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManager;
@@ -22,6 +21,7 @@ public class BackgroundAppDetector implements Detector {
 
         ApplicationInfo foregroundApp = null;
         String applicationName = null;
+
 
         UsageStatsManager mUsageStatsManager = (UsageStatsManager) context.getSystemService(Service.USAGE_STATS_SERVICE);
         long time = System.currentTimeMillis();

@@ -216,8 +216,13 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
             FileOutputStream fout = new FileOutputStream(file.getAbsoluteFile(), true);
             OutputStreamWriter myOutWriter = new OutputStreamWriter(fout);
 
-            myOutWriter.write(app + " " + max_speed + " " + min_speed + "\n");
-            myOutWriter.flush();
+            if (max_speed < min_speed) {
+                Toast.makeText(CPUActivity.this, "Min speed is greater than max", Toast.LENGTH_LONG).show();
+            } else {
+                myOutWriter.write(app + " " + max_speed + " " + min_speed + "\n");
+                myOutWriter.flush();
+            }
+
 
         } catch (Exception e) {
             e.printStackTrace();
