@@ -1,9 +1,7 @@
 package com.example.rishivijaygajelli.appconengine;
 
 import android.annotation.TargetApi;
-import android.app.ActivityManager;
-import android.app.usage.UsageStatsManager;
-import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -11,6 +9,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -21,8 +20,7 @@ import android.widget.Toast;
 
 import com.example.rishivijaygajelli.appconengine.rootutil.BackgroundAppCheck.ChangeFreqTask;
 import com.example.rishivijaygajelli.appconengine.rootutil.CPUstates.Util;
-import com.pranavpandey.android.dynamic.engine.service.DynamicEngine;
-import com.pranavpandey.android.dynamic.engine.task.DynamicAppMonitor;
+import com.google.android.material.navigation.NavigationView;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -34,21 +32,24 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 
 
 public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, LoaderManager.LoaderCallbacks<Void> {
 
-    Spinner spn_app, spn_governor;
+    Spinner spn_app;
     LinearLayout lcurcpu;
     TextView current_speed, max_speed_text, min_speed_text;
     SeekBar max_slider, min_slider;
     Toolbar toolbar;
     Button btn_save_profile;
-
+    int nCpus = Util.getNumOfCpus();
     SharedPreferences mPreferences;
 
     LoaderManager loaderManager;
@@ -62,16 +63,8 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
     public static final String GOVERNORS_LIST_PATH = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors";
     public static final String GOVERNOR_PATH = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor";
 
-    private static final String TAG = "";
-    public static ArrayList<String> mCurGovernor = new ArrayList<String>();
-    public static ArrayList<String> mCurIO = new ArrayList<String>();
-    public static ArrayList<String> mMaxFreqSetting = new ArrayList<String>();
-    public static ArrayList<String> mMinFreqSetting = new ArrayList<String>();
-    public static ArrayList<String> mCPUon = new ArrayList<String>();
-    public String[] mAvailableFrequencies = new String[0];
-    public Context c;
     Util util = new Util();
-    int nCpus = util.getNumOfCpus();
+    private DrawerLayout drawer_main;
     String[] cpu;
 
     int max_cpu_array, min_cpu_array;
@@ -81,10 +74,6 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
     String cpuMaxFinal, cpuMinFinal = null;
     String cpuMax, cpuMin, cpuFileMax, cpuFileMin = null;
 
-    ActivityManager mActivityManager;
-    DynamicEngine mDynamicEngine;
-    UsageStatsManager mUsageStatsManager;
-    private DynamicAppMonitor mDynamicAppMonitor;
 
     public CPUActivity() {
     }
@@ -115,6 +104,8 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
         min_slider.setOnSeekBarChangeListener(this);
         min_slider.setMax(mFrequenciesNum);
 
+        drawer_main = findViewById(R.id.drawer_main2);
+
         toolbar = findViewById(R.id.toolbar);
         loaderManager = getSupportLoaderManager();
 
@@ -123,14 +114,14 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
         }
 
         cpuMax = Util.readOneLine(MAX_FREQ_PATH);
-        cpuMaxFinal = util.toMHz(cpuMax);
+        cpuMaxFinal = Util.toMHz(cpuMax);
         max_speed_text.setText(cpuMaxFinal);
 
         cpuMin = Util.readOneLine(MIN_FREQ_PATH);
-        cpuMinFinal = util.toMHz(cpuMin);
+        cpuMinFinal = Util.toMHz(cpuMin);
         min_speed_text.setText(cpuMinFinal);
 
-        for(int i = 0; i < cpu.length; i++) {
+        for (int i = 0; i < cpu.length; i++) {
             if (cpuMax.equals(cpu[i])) {
                 max_cpu_array = i;
                 max_slider.setProgress(max_cpu_array);
@@ -147,7 +138,7 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
         List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
 
         for (ApplicationInfo packageInfo : packages) {
-            if( pm.getLaunchIntentForPackage(packageInfo.packageName) != null ){
+            if (pm.getLaunchIntentForPackage(packageInfo.packageName) != null) {
                 String title = pm.getApplicationLabel(packageInfo).toString();
                 list_app.add(title);
 
@@ -156,26 +147,8 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
         Collections.sort(list_app);
         ArrayAdapter<String> appAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1, list_app);
+        appAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spn_app.setAdapter(appAdapter);
-
-
-        spn_governor = findViewById(R.id.spn_governor);
-        String[] mAvailableGovernors = Util.readOneLine(GOVERNORS_LIST_PATH).split(" ");
-        String cur_governor = Util.readOneLine(GOVERNOR_PATH);
-        int in = 0;
-        for(int i = 0; i<mAvailableGovernors.length; i++) {
-            if(cur_governor.equals(mAvailableGovernors[i])) {
-                in=i;
-            }
-        }
-        ArrayAdapter<CharSequence> governorAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_list_item_1);
-        governorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        for (String mAvailableGovernor : mAvailableGovernors) {
-            governorAdapter.add(mAvailableGovernor.trim());
-        }
-        spn_governor.setAdapter(governorAdapter);
-        spn_governor.setSelection(in);
-
 
         btn_save_profile = findViewById(R.id.btn_save_profile);
         btn_save_profile.setOnClickListener(v -> {
@@ -185,9 +158,9 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
             cpuFileMin = min_speed_text.getText().toString().replace(" MHz", "");
             cpuFileMinFinal = Integer.parseInt(cpuFileMin) * 1000;
 
-            // Util.setFreq(current_max,current_min);
             app = spn_app.getSelectedItem().toString();
             if (app.equals(".All Apps (Overall Device)")) {
+                writeCPUtoFile(cpuFileMaxFinal, cpuFileMinFinal);
                 loaderManager.initLoader(1, null, this);
             } else {
                 writeFreqtoFile(app, cpuFileMaxFinal, cpuFileMinFinal);
@@ -195,8 +168,56 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
             }
         });
 
+        setSupportActionBar(toolbar);
+        ActionBar actionbar = getSupportActionBar();
+        actionbar.setDisplayHomeAsUpEnabled(true);
+        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
+
+        NavigationView navigationView = findViewById(R.id.nav_view2);
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                menuItem.setChecked(true);
+                drawer_main.closeDrawers();
+
+                switch (menuItem.getItemId()) {
+                    case R.id.nav_home:
+                        Intent cpu1 = new Intent(CPUActivity.this, MainScreenActivity.class);
+                        startActivity(cpu1);
+                        break;
+
+                    case R.id.nav_cpu:
+                        drawer_main.closeDrawers();
+                        break;
+
+                    case R.id.nav_settings:
+                        drawer_main.closeDrawers();
+                        break;
+
+                    case R.id.nav_sleep:
+                        Intent cpu4 = new Intent(CPUActivity.this, SleepActivity.class);
+                        startActivity(cpu4);
+                        break;
+
+                    case R.id.nav_about:
+                        drawer_main.closeDrawers();
+                        break;
+                }
+                return true;
+            }
+        });
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                drawer_main.openDrawer(GravityCompat.START);
+                return true;
+
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     private void writeFreqtoFile(String app, int max_speed, int min_speed) {
         this.app = app;
@@ -208,19 +229,22 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
                 folder.mkdirs();
                 System.out.println("Directory created");
             }
-            File file = new File(Environment.getExternalStorageDirectory() + "/AppFreCon Engine/App Frequency.conf");
+            File file = new File(Environment.getExternalStorageDirectory() + "/AppFreCon Engine/App Frequency-" + app + ".conf");
             if (!file.exists()) {
                 file.createNewFile();
                 System.out.println("File created");
             }
-            FileOutputStream fout = new FileOutputStream(file.getAbsoluteFile(), true);
-            OutputStreamWriter myOutWriter = new OutputStreamWriter(fout);
+            if (file.exists()) {
+                file.delete();
+                file.createNewFile();
+                FileOutputStream fout = new FileOutputStream(file.getAbsoluteFile(), true);
+                OutputStreamWriter myOutWriter = new OutputStreamWriter(fout);
+                myOutWriter.write(app + " " + max_speed + " " + min_speed + "\n");
+                myOutWriter.flush();
+            }
 
             if (max_speed < min_speed) {
                 Toast.makeText(CPUActivity.this, "Min speed is greater than max", Toast.LENGTH_LONG).show();
-            } else {
-                myOutWriter.write(app + " " + max_speed + " " + min_speed + "\n");
-                myOutWriter.flush();
             }
 
 
@@ -228,6 +252,40 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
             e.printStackTrace();
         }
     }
+
+    private void writeCPUtoFile(int max_speed, int min_speed) {
+        this.cpuFileMaxFinal = max_speed;
+        this.cpuFileMinFinal = min_speed;
+        try {
+            File folder = new File(Environment.getExternalStorageDirectory() + "/AppFreCon Engine");
+            if (!folder.exists()) {
+                folder.mkdirs();
+                System.out.println("Directory created");
+            }
+            File file = new File(Environment.getExternalStorageDirectory() + "/AppFreCon Engine/CPU Frequency.conf");
+            if (!file.exists()) {
+                file.createNewFile();
+                System.out.println("File created");
+            }
+            if (file.exists()) {
+                file.delete();
+                file.createNewFile();
+                FileOutputStream fout = new FileOutputStream(file.getAbsoluteFile(), true);
+                OutputStreamWriter myOutWriter = new OutputStreamWriter(fout);
+                myOutWriter.write(max_speed + " " + min_speed + "\n");
+                myOutWriter.flush();
+            }
+
+            if (max_speed < min_speed) {
+                Toast.makeText(CPUActivity.this, "Min speed is greater than max", Toast.LENGTH_LONG).show();
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -257,7 +315,7 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
         int maxSliderProgress = max_slider.getProgress();
         if (progress <= maxSliderProgress) {
            max_slider.setProgress(progress);
-            max_speed_text.setText(util.toMHz(current_max));
+            max_speed_text.setText(Util.toMHz(current_max));
         }
     }
 
@@ -266,7 +324,7 @@ public class CPUActivity extends AppCompatActivity implements SeekBar.OnSeekBarC
         int minSliderProgress = min_slider.getProgress();
         if (progress <= minSliderProgress) {
             min_slider.setProgress(progress);
-            min_speed_text.setText(util.toMHz(current_min));
+            min_speed_text.setText(Util.toMHz(current_min));
         }
     }
 

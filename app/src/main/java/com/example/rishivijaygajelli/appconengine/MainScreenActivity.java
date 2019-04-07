@@ -59,7 +59,6 @@ public class MainScreenActivity extends AppCompatActivity {
     public static int curcpu = 0;
     public static ArrayList<String> mCPUon = new ArrayList<String>();
     CurrentFrequency cf = new CurrentFrequency();
-    public int nCpus = cf.getNumOfCpus();
     SharedPreferences preferences;
     private TextView ui_total_state_time;
     private LinearLayout ui_states_view;
@@ -169,13 +168,16 @@ public class MainScreenActivity extends AppCompatActivity {
                         break;
 
                     case R.id.nav_settings:
-                        Intent cpu2 = new Intent(MainScreenActivity.this, CPUActivity.class);
-                        startActivity(cpu2);
+                        drawer_main.closeDrawers();
+                        break;
+
+                    case R.id.nav_sleep:
+                        Intent cpu4 = new Intent(MainScreenActivity.this, SleepActivity.class);
+                        startActivity(cpu4);
                         break;
 
                     case R.id.nav_about:
-                        Intent cpu3 = new Intent(MainScreenActivity.this, CPUActivity.class);
-                        startActivity(cpu3);
+                        drawer_main.closeDrawers();
                         break;
                 }
                 return true;
@@ -409,23 +411,6 @@ public class MainScreenActivity extends AppCompatActivity {
         private boolean mInterrupt = false;
         private String onlist = "";
 
-
-        public int getNumOfCpus() {
-            int numOfCpu = 1;
-            String numOfCpus = readOneLine(NUM_OF_CPUS_PATH);
-            String[] cpuCount = numOfCpus.split("-");
-            if (cpuCount.length > 1) {
-                try {
-                    int cpuStart = Integer.parseInt(cpuCount[0]);
-                    int cpuEnd = Integer.parseInt(cpuCount[1]);
-                    numOfCpu = cpuEnd - cpuStart + 1;
-                    if (numOfCpu < 0) numOfCpu = 1;
-                } catch (NumberFormatException ex) {
-                    numOfCpu = 1;
-                }
-            }
-            return numOfCpu;
-        }
 
         public String readOneLine(String fname) {
             String line = null;

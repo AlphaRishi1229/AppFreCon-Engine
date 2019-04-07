@@ -2,7 +2,7 @@
 
 <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/drawer_main2"
+    android:id="@+id/drawer_main3"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
@@ -40,77 +40,11 @@
             android:orientation="vertical">
 
             <LinearLayout
-                android:id="@+id/lcurcpu"
-                android:layout_width="fill_parent"
-                android:layout_height="25dp"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
-                android:gravity="center_vertical|center_horizontal"
-                android:orientation="horizontal"
-                android:weightSum="1">
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/speed"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/lcurcpu"
-                android:layout_alignParentStart="false"
-                android:layout_marginStart="0dp"
-                android:layout_marginTop="-25dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/current_speed"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_horizontal"
-                    android:textSize="35sp" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/select_app_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/speed"
-                android:layout_marginTop="75dp"
-                android:layout_marginBottom="10dp"
-                android:gravity="center_horizontal"
-                android:orientation="vertical">
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dip"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/current_app_label"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentTop="true"
-                        android:layout_centerHorizontal="true"
-                        android:text="Select Application"
-                        android:textSize="20sp" />
-
-                    <Spinner
-                        android:id="@+id/spn_app"
-                        android:layout_width="300dp"
-                        android:layout_height="40dp"
-                        android:layout_below="@+id/current_app_label"
-                        android:layout_centerHorizontal="true"
-                        android:layout_marginTop="0dp" />
-                </RelativeLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
                 android:id="@+id/max_speed_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/select_app_layout"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="141dp"
                 android:layout_marginBottom="10dp"
                 android:gravity="center_horizontal"
                 android:orientation="vertical">
@@ -129,25 +63,23 @@
                         android:layout_alignParentTop="true"
                         android:layout_marginStart="96dp"
                         android:layout_marginTop="0dp"
-                        android:text="Current Max - "
+                        android:text="Current Sleep Max - "
                         android:textSize="20sp" />
 
                     <TextView
-                        android:id="@+id/max_speed_text"
+                        android:id="@+id/max_speed_sleep"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentTop="true"
-                        android:layout_alignParentEnd="true"
                         android:layout_marginStart="-1dp"
                         android:layout_marginTop="0dp"
-                        android:layout_marginEnd="123dp"
                         android:layout_toEndOf="@+id/current_max_label"
                         android:text="Text"
                         android:textSize="20sp" />
                 </RelativeLayout>
 
                 <SeekBar
-                    android:id="@+id/max_slider"
+                    android:id="@+id/max_slider_sleep"
                     style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
@@ -160,6 +92,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/max_speed_layout"
+                android:layout_marginTop="14dp"
                 android:gravity="center_horizontal"
                 android:orientation="vertical">
 
@@ -176,11 +109,11 @@
                         android:layout_alignParentStart="true"
                         android:layout_alignParentTop="true"
                         android:layout_marginStart="99dp"
-                        android:text="Current Min - "
+                        android:text="Current Sleep Min - "
                         android:textSize="20sp" />
 
                     <TextView
-                        android:id="@+id/min_speed_text"
+                        android:id="@+id/min_speed_sleep"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentTop="true"
@@ -190,7 +123,7 @@
                 </RelativeLayout>
 
                 <SeekBar
-                    android:id="@+id/min_slider"
+                    android:id="@+id/min_slider_sleep"
                     style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
@@ -201,9 +134,9 @@
             <LinearLayout
                 android:id="@+id/ButtonProfile"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="278dp"
                 android:layout_below="@+id/min_speed_layout"
-                android:layout_marginTop="59dp"
+                android:layout_marginTop="94dp"
                 android:gravity="center_vertical|center_horizontal"
                 android:orientation="horizontal">
 
@@ -214,7 +147,7 @@
                     android:orientation="horizontal">
 
                     <Button
-                        android:id="@+id/btn_save_profile"
+                        android:id="@+id/btn_save_sleep"
                         style="@style/Widget.AppCompat.Button.Borderless.Colored"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -229,7 +162,7 @@
 
 
     <com.google.android.material.navigation.NavigationView
-        android:id="@+id/nav_view2"
+        android:id="@+id/nav_view3"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"

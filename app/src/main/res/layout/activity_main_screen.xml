@@ -16,124 +16,129 @@
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="100dp"
             android:background="@color/colorPrimaryDark"
             android:contentInsetStart="0dp"
             android:contentInsetLeft="0dp"
             android:contentInsetEnd="0dp"
             android:contentInsetRight="0dp"
-            android:gravity="top|fill|start"
+            android:gravity="start|fill|top"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
             app:contentInsetEnd="0dp"
             app:contentInsetLeft="0dp"
             app:contentInsetRight="0dp"
             app:contentInsetStart="0dp"
-            app:subtitleTextColor="@android:color/background_light" />
+            app:subtitleTextColor="@color/design_default_color_background"
+            app:titleMarginStart="1dp"
+            app:titleMarginTop="60dp"
+            app:titleTextAppearance="@android:style/TextAppearance.DeviceDefault.Large"
+            app:titleTextColor="@color/design_default_color_background" />
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="55dp">
-
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="40dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:clickable="true"
-                    android:text="Start AppFreCon Engine Service"
-                    android:textSize="18sp"
-                    android:onClick="AccessibilityClick"
-                    android:textStyle="italic" />
-
-                <Switch
-                    android:id="@+id/service_switch"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginEnd="0dp" />
-
-
-                <View
-                    android:id="@+id/divider"
-                    android:layout_width="match_parent"
-                    android:layout_height="2dp"
-                    android:layout_below="@+id/service_switch"
-                    android:layout_alignParentStart="true"
-                    android:background="@android:color/darker_gray" />
-            </RelativeLayout>
-            <TextView
-                android:id="@+id/ui_header_total_state_time"
-                style="?android:attr/listSeparatorTextViewStyle"
-                android:text="total state time" />
-
-            <TextView
-                android:id="@+id/ui_total_state_time"
-                android:layout_width="374dp"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:padding="7dp"
-                android:textSize="25sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/ui_header_current_freq"
-                style="?android:attr/listSeparatorTextViewStyle"
-                android:text="Current Frequency" />
-
-            <TextView
-                android:id="@+id/ui_current_freq"
-                android:layout_width="374dp"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:padding="7dp"
-                android:textSize="25sp"
-                android:textStyle="bold" />
-
-            <TextView
-                style="?android:attr/listSeparatorTextViewStyle"
-                android:text="time in state" />
+            android:layout_marginTop="101dp">
 
             <LinearLayout
-                android:id="@+id/ui_states_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingBottom="10dp" />
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/ui_states_warning"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#551111"
-                android:padding="15dp"
-                android:text="no_states_file_found"
-                android:textSize="20sp"
-                android:visibility="gone" />
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp">
 
-            <TextView
-                android:id="@+id/ui_header_additional_states"
-                style="?android:attr/listSeparatorTextViewStyle"
-                android:text="unused_cpu_states"
-                android:visibility="gone" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:onClick="AccessibilityClick"
+                        android:text="Start AppFreCon Engine Service"
+                        android:textSize="18sp"
+                        android:textStyle="italic" />
 
-            <TextView
-                android:id="@+id/ui_additional_states"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="6dp"
-                android:visibility="gone" />
+                    <Switch
+                        android:id="@+id/service_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="0dp" />
 
-        </LinearLayout>
 
-    </ScrollView>
+                    <View
+                        android:id="@+id/divider"
+                        android:layout_width="match_parent"
+                        android:layout_height="2dp"
+                        android:layout_below="@+id/service_switch"
+                        android:layout_alignParentStart="true"
+                        android:background="@android:color/darker_gray" />
+                </RelativeLayout>
+
+                <TextView
+                    android:id="@+id/ui_header_total_state_time"
+                    style="?android:attr/listSeparatorTextViewStyle"
+                    android:text="total state time" />
+
+                <TextView
+                    android:id="@+id/ui_total_state_time"
+                    android:layout_width="374dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:padding="7dp"
+                    android:textSize="25sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/ui_header_current_freq"
+                    style="?android:attr/listSeparatorTextViewStyle"
+                    android:text="Current Frequency" />
+
+                <TextView
+                    android:id="@+id/ui_current_freq"
+                    android:layout_width="374dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:padding="7dp"
+                    android:textSize="25sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    style="?android:attr/listSeparatorTextViewStyle"
+                    android:text="time in state" />
+
+                <LinearLayout
+                    android:id="@+id/ui_states_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="10dp" />
+
+                <TextView
+                    android:id="@+id/ui_states_warning"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#551111"
+                    android:padding="15dp"
+                    android:text="no_states_file_found"
+                    android:textSize="20sp"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/ui_header_additional_states"
+                    style="?android:attr/listSeparatorTextViewStyle"
+                    android:text="unused_cpu_states"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/ui_additional_states"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="6dp"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+        </ScrollView>
 
     </FrameLayout>
 

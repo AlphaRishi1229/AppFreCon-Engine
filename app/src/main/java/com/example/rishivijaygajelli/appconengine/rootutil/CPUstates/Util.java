@@ -7,8 +7,8 @@ import android.util.Log;
 import com.example.rishivijaygajelli.appconengine.CPUActivity;
 import com.topjohnwu.superuser.ShellUtils;
 import com.topjohnwu.superuser.io.SuFile;
-import com.topjohnwu.superuser.io.SuFileInputStream;
-import com.topjohnwu.superuser.io.SuFileOutputStream;
+import com.topjohnwu.superuser.io.SuProcessFileInputStream;
+import com.topjohnwu.superuser.io.SuProcessFileOutputStream;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -23,7 +23,7 @@ public class Util {
     static String NUM_OF_CPUS_PATH = "/sys/devices/system/cpu/present";
 
 
-    public int getNumOfCpus() {
+    public static int getNumOfCpus() {
         int numOfCpu = 1;
         String numOfCpus = readOneLine(NUM_OF_CPUS_PATH);
         String[] cpuCount = numOfCpus.split("-");
@@ -63,7 +63,7 @@ public class Util {
     }
 
 
-    public String toMHz(String mhzString) {
+    public static String toMHz(String mhzString) {
         if ((mhzString == null) || (mhzString.length() <= 0)) return "";
         else return String.valueOf(Integer.parseInt(mhzString) / 1000) + " MHz";
     }
@@ -75,7 +75,7 @@ public class Util {
         //return Shell.su("cat "+"$"+filePath).exec().toString();
         try {
             SuFile file = new SuFile(filePath);
-            SuFileInputStream fileInput = new SuFileInputStream(file);
+            SuProcessFileInputStream fileInput = new SuProcessFileInputStream(file);
             StringBuilder stringBuilder = new StringBuilder();
 
             BufferedReader buf = new BufferedReader(new InputStreamReader(fileInput, Charset.defaultCharset()));
@@ -88,36 +88,63 @@ public class Util {
         return line;
     }
 
-    public static boolean setFreq(String max_freq, String min_freq) {
-       ByteArrayInputStream inputStream = new ByteArrayInputStream(max_freq.getBytes(Charset.forName("UTF-8")));
-       ByteArrayInputStream inputStream1 = new ByteArrayInputStream(min_freq.getBytes(Charset.forName("UTF-8")));
+    public static void writeMax(String maxfreq) {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(maxfreq.getBytes(Charset.forName("UTF-8")));
+        int cpus = getNumOfCpus();
 
-       SuFileOutputStream outputStream;
-        SuFileOutputStream outputStream1;
-        try {
-            if (max_freq != null) {
-                int cpus = 0;
-                while (true) {
-                    SuFile f = new SuFile(CPUActivity.MAX_FREQ_PATH.replace("cpu0", "cpu" + cpus));
-                    SuFile f1 = new SuFile(CPUActivity.MIN_FREQ_PATH.replace("cpu0", "cpu" + cpus));
-
-                    outputStream = new SuFileOutputStream(f);
-                    outputStream1 = new SuFileOutputStream(f1);
-
+        for (int i = 0; i < cpus; i++) {
+            try {
+                File f = new File(CPUActivity.MAX_FREQ_PATH.replace("cpu0", "cpu" + i));
+                if (f.exists()) {
+                    SuProcessFileOutputStream outputStream = new SuProcessFileOutputStream(f);
                     ShellUtils.pump(inputStream, outputStream);
-                    ShellUtils.pump(inputStream1, outputStream1);
-
-                    if (!f.exists()) {
-                        break;
-                    }
-                    cpus++;
+                    outputStream.close();
                 }
+                if (!f.exists()) {
+                    break;
+                }
+            } catch (Exception e) {
 
             }
-        } catch (Exception ex) {
         }
-        return true;
+
     }
+
+    public static void writeMin(String minfreq) {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(minfreq.getBytes(Charset.forName("UTF-8")));
+        int cpus = getNumOfCpus();
+
+        for (int i = 0; i < cpus; i++) {
+            try {
+                File f = new File(CPUActivity.MIN_FREQ_PATH.replace("cpu0", "cpu" + i));
+                if (f.exists()) {
+                    SuProcessFileOutputStream outputStream = new SuProcessFileOutputStream(f);
+                    ShellUtils.pump(inputStream, outputStream);
+                    outputStream.close();
+                }
+                if (!f.exists()) {
+                    break;
+                }
+            } catch (Exception e) {
+
+            }
+        }
+
+    }
+
+    public static void setFreq(String max_freq, String min_freq) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                writeMax(max_freq);
+                writeMin(min_freq);
+            }
+
+
+        }).start();
+
+    }
+
 
     private static SharedPreferences getSharedPrefs(final Context context) {
         final String prefsName = "prefs_name";
